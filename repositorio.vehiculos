@@ -1,0 +1,23 @@
+package com.micacharrito.repositorio;
+
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import com.micacharrito.modelo.Vehiculos;
+
+@Repository
+public interface VehiculosRepositorio extends JpaRepository<Vehiculos, Integer> {
+
+    public List<Vehiculos> findByEstado(String estado);
+
+    public List<Vehiculos> findByTipoVehiculoAndEstado(String tipoVehiculo, String estado);
+
+    public Optional<Vehiculos> findByPlaca(String placa);
+
+    @Query(value = "SELECT * FROM vehiculos WHERE estado = 'Disponible' AND tipo_vehiculo = :tipo", nativeQuery = true)
+    public List<Vehiculos> obtenerDisponiblesPorTipo(@Param("tipo") String tipo);
+}
