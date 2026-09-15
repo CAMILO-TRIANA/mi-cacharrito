@@ -1,0 +1,99 @@
+package com.micacharrito.modelo;
+
+import java.time.LocalDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "auditoria")
+public class Auditoria {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+
+    @ManyToOne
+    @JoinColumn(name = "administrador_id", nullable = false)
+    private Administradores administrador;
+
+    @ManyToOne
+    @JoinColumn(name = "alquiler_id", nullable = false)
+    private Alquileres alquiler;
+
+    @Column(name = "accion", length = 50, nullable = false)
+    private String accion;
+
+    @Column(name = "fecha_accion", nullable = false)
+    private LocalDateTime fechaAccion = LocalDateTime.now();
+
+    @Column(name = "detalles", columnDefinition = "TEXT")
+    private String detalles;
+
+    public Auditoria() {
+    }
+
+    public Auditoria(Integer id, Administradores administrador, Alquileres alquiler, String accion,
+                     LocalDateTime fechaAccion, String detalles) {
+        this.id = id;
+        this.administrador = administrador;
+        this.alquiler = alquiler;
+        this.accion = accion;
+        this.fechaAccion = fechaAccion;
+        this.detalles = detalles;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Administradores getAdministrador() {
+        return administrador;
+    }
+
+    public void setAdministrador(Administradores administrador) {
+        this.administrador = administrador;
+    }
+
+    public Alquileres getAlquiler() {
+        return alquiler;
+    }
+
+    public void setAlquiler(Alquileres alquiler) {
+        this.alquiler = alquiler;
+    }
+
+    public String getAccion() {
+        return accion;
+    }
+
+    public void setAccion(String accion) {
+        this.accion = accion;
+    }
+
+    public LocalDateTime getFechaAccion() {
+        return fechaAccion;
+    }
+
+    public void setFechaAccion(LocalDateTime fechaAccion) {
+        this.fechaAccion = fechaAccion;
+    }
+
+    public String getDetalles() {
+        return detalles;
+    }
+
+    public void setDetalles(String detalles) {
+        this.detalles = detalles;
+    }
+}
