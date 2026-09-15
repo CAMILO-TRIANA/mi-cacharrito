@@ -1,0 +1,32 @@
+package com.micacharrito.controlador;
+
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.micacharrito.repositorio.AdministradoresRepositorio;
+
+@RestController
+@RequestMapping("/api/administradores")
+@CrossOrigin(origins = "*")
+public class AdministradoresControlador {
+
+    @Autowired
+    private AdministradoresRepositorio administradoresRepositorio;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
+        String usuario = credenciales.get("usuario");
+        String pass = credenciales.get("password");
+
+        return administradoresRepositorio.findByUsuarioAndPassword(usuario, pass)
+                .map(admin -> ResponseEntity.ok((Object) admin))
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contrasena de administrador incorrectos."));
+    }
+}
