@@ -1,0 +1,13 @@
+package com.micacharrito.repositorio;
+
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.micacharrito.modelo.Administradores;
+
+@Repository
+public interface AdministradoresRepositorio extends JpaRepository<Administradores, Integer> {
+
+    public Optional<Administradores> findByUsuarioAndPassword(String usuario, String password);
+}
