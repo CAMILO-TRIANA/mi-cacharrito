@@ -1,0 +1,25 @@
+mi-cacharrito-backend/
+├── src/main/java/
+│   └── com/micacharrito/
+│       ├── MiCacharritoApplication.java (Clase principal)
+│       ├── modelo/
+│       │   ├── Administradores.java
+│       │   ├── Alquileres.java
+│       │   ├── Auditoria.java
+│       │   ├── Usuarios.java
+│       │   └── Vehiculos.java
+│       ├── repositorio/
+│       │   ├── AdministradoresRepositorio.java
+│       │   ├── AlquileresRepositorio.java
+│       │   ├── AuditoriaRepositorio.java
+│       │   ├── UsuariosRepositorio.java
+│       │   └── VehiculosRepositorio.java
+│       └── controlador/
+│           ├── AdministradoresControlador.java
+│           ├── AlquileresControlador.java
+│           ├── AuditoriaControlador.java
+│           ├── UsuariosControlador.java
+│           └── VehiculosControlador.java
+├── src/main/resources/
+│   └── application.properties
+└── pom.xml
