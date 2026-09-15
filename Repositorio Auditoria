@@ -1,0 +1,15 @@
+package com.micacharrito.repositorio;
+
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.micacharrito.modelo.Auditoria;
+
+@Repository
+public interface AuditoriaRepositorio extends JpaRepository<Auditoria, Integer> {
+
+    public List<Auditoria> findByAdministradorId(Integer administradorId);
+
+    public List<Auditoria> findByAlquilerId(Integer alquilerId);
+}
