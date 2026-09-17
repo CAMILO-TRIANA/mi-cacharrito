@@ -1,0 +1,88 @@
+package com.micacharrito.controlador;
+
+import com.micacharrito.modelo.Alquileres;
+import com.micacharrito.repositorio.AlquileresRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/alquileres")
+public class AlquileresController {
+
+    @Autowired
+    private AlquileresRepository alquileresRepository;
+
+    // 1. El usuario solicita un alquiler 
+    @PostMapping("/solicitar")
+    public ResponseEntity<Alquileres> crearAlquiler(@RequestBody Alquileres alquiler) {
+        // Genera un número de alquiler aleatorio si no viene definido
+        if (alquiler.getNumeroAlquiler() == null || alquiler.getNumeroAlquiler().isEmpty()) {
+            alquiler.setNumeroAlquiler("ALQ-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        }
+
+        // Calcula los días de alquiler
+        long dias = ChronoUnit.DAYS.between(alquiler.getFechaInicio(), alquiler.getFechaEntregaPactada());
+        if (dias <= 0) dias = 1;
+
+        // Calcula el costo total basándose en el valor diario del vehículo
+        BigDecimal costoDiario = alquiler.getVehiculo().getPrecioDiario(); 
+        alquiler.setValorTotal(costoDiario.multiply(BigDecimal.valueOf(dias)));
+        alquiler.setEstado("Pendiente de entrega");
+
+        Alquileres nuevoAlquiler = alquileresRepository.save(alquiler);
+        return ResponseEntity.ok(nuevoAlquiler);
+    }
+
+    // 2. El usuario puede cancelar un alquiler
+    @PutMapping("/cancelar/{id}")
+    public ResponseEntity<String> cancelarAlquiler(@PathVariable Integer id) {
+        return alquileresRepository.findById(id).map(alquiler -> {
+            alquiler.setEstado("Cancelado");
+            alquileresRepository.save(alquiler);
+            return ResponseEntity.ok("El alquiler ha sido cancelado exitosamente.");
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // 3. El admin ve los alquileres que no han sido entregados al usuario
+    @GetMapping("/no-entregados")
+    public List<Alquileres> obtenerNoEntregados() {
+        return alquileresRepository.findByEstado("Pendiente de entrega");
+    }
+
+    // 4. El admin busca por PLACA y cambia el estado a "Entregado"
+    @PutMapping("/entregar/placa/{placa}")
+    public ResponseEntity<Alquileres> entregarVehiculo(@PathVariable String placa) {
+        return alquileresRepository.findByVehiculoPlacaAndEstado(placa, "Pendiente de entrega")
+                .map(alquiler -> {
+                    alquiler.setEstado("Entregado");
+                    return ResponseEntity.ok(alquileresRepository.save(alquiler));
+                }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // 5. El admin busca por NÚMERO DE ALQUILER y pasa el auto a "Disponible" 
+    @PutMapping("/devolver/numero/{numeroAlquiler}")
+    public ResponseEntity<Alquileres> recibirDevolucion(@PathVariable String numeroAlquiler) {
+        return alquileresRepository.findByNumeroAlquiler(numeroAlquiler).map(alquiler -> {
+            LocalDate hoy = LocalDate.now();
+            alquiler.setFechaEntregaReal(hoy);
+
+            // Si se entrega después de la fecha pactada, cobra los días posteriores
+            if (hoy.isAfter(alquiler.getFechaEntregaPactada())) {
+                long diasExtra = ChronoUnit.DAYS.between(alquiler.getFechaEntregaPactada(), hoy);
+                BigDecimal precioDiario = alquiler.getVehiculo().getPrecioDiario();
+                BigDecimal recargo = precioDiario.multiply(BigDecimal.valueOf(diasExtra));
+                alquiler.setValorTotal(alquiler.getValorTotal().add(recargo));
+            }
+
+            alquiler.setEstado("Disponible");
+            return ResponseEntity.ok(alquileresRepository.save(alquiler));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+}
